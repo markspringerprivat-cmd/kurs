@@ -116,5 +116,72 @@ function showTimerNotice(text){
 }
 function setupTotalTime(){const el=document.querySelector('[data-total-time]'); if(!el) return; const keys=['rollenverteilung','schueler-1','lehrkraft-1','beobachter-1','schueler-2','lehrkraft-2','beobachter-2','schueler-3','lehrkraft-3','beobachter-3','schueler-4','lehrkraft-4','beobachter-4','reflexion','theorie-zuordnung']; let total=0; keys.forEach(k=>{total+=Number(load('timer-used-'+k,'0'))||0}); el.textContent=total?`Bisher benötigte Arbeitszeit: ca. ${fmtTime(total)}`:'Bisher wurde noch keine Arbeitszeit erfasst.'}
 
+
+function roleFromStepKey(){
+  const keyName=document.body.dataset.stepKey||'';
+  const m=keyName.match(/^(schueler|lehrkraft|beobachter)-/);
+  if(m) return m[1];
+  const file=(location.pathname.split('/').pop()||'').replace('.html','');
+  if(file.startsWith('schueler')) return 'schueler';
+  if(file.startsWith('lehrkraft')) return 'lehrkraft';
+  if(file.startsWith('beobachter')) return 'beobachter';
+  return '';
+}
+function situationData(){
+  const situation='Im Unterricht der Klasse kommt es seit einigen Tagen wiederholt zu Spannungen zwischen einem Schüler und einer Lehrkraft. Während einer Arbeitsphase nutzt der Schüler wiederholt sein Handy. Die Lehrkraft hat ihn bereits mehrfach darauf hingewiesen, das Handy wegzulegen und sich wieder auf die Aufgabe zu konzentrieren. Der Schüler reagiert zunehmend genervt, fühlt sich vor der Gruppe kontrolliert und hat den Eindruck, häufiger kritisiert zu werden als andere. Die Lehrkraft erlebt die wiederholte Handynutzung als Störung des Unterrichts, fühlt sich in ihrer Rolle nicht ernst genommen und möchte die Situation klären, ohne den Kontakt zum Schüler zu verlieren. Im Gespräch soll sichtbar werden, welche Gefühle, Erwartungen, Grenzen und Belastungen auf beiden Seiten eine Rolle spielen und wie ein respektvoller Umgang wieder möglich werden kann.';
+  return {
+    schueler:{
+      title:'Rollenkarte Schüler/in',
+      intro:'Du klärst deine Sicht, deine Gefühle und deine Erwartungen, ohne aus dem Gespräch auszusteigen.',
+      situation,
+      background:'Du bist im Unterricht häufig angespannt, wenn du das Gefühl hast, beobachtet oder direkt kritisiert zu werden. Außerhalb der Schule ist gerade einiges los: Es gibt Streit in der Familie, und auch im Freundeskreis möchtest du erreichbar bleiben. Das Handy bedeutet für dich nicht nur Ablenkung, sondern auch Kontakt, Sicherheit und kurze Entlastung. Gleichzeitig möchtest du nicht als „Problemfall“ gesehen werden, sondern als Person, deren Sicht ernst genommen wird.',
+      situationList:['Du fühlst dich unfair behandelt.','Zuhause gibt es momentan Stress.','Du bist schnell gereizt.','Du hast das Gefühl, dass die Lehrkraft dich ständig kritisiert.'],
+      goal:['Erkläre deine Sichtweise.','Sage, warum du genervt reagierst.','Reagiere ehrlich auf die Aussagen der Lehrkraft.','Überlege, wann du dich verstanden fühlst.'],
+      focus:['deine Reaktionen','deine Gefühle','deinen Umgangston','darauf, wie die Lehrkraft auf dich wirkt']
+    },
+    lehrkraft:{
+      title:'Rollenkarte Lehrkraft',
+      intro:'Du klärst die Situation professionell, setzt Grenzen und hältst gleichzeitig den Kontakt zum Schüler.',
+      situation,
+      background:'Du erlebst die wiederholte Handynutzung als Belastung, weil sie die Arbeitsruhe stört und andere Schülerinnen und Schüler ebenfalls ablenken kann. Gleichzeitig weißt du, dass hinter gereiztem Verhalten auch Unsicherheit, Stress oder der Wunsch nach Kontrolle stecken können. Du möchtest nicht nur eine Regel durchsetzen, sondern ein Gespräch führen, in dem klare Erwartungen und ein respektvoller Kontakt miteinander verbunden bleiben.',
+      situationList:['Du bist heute gestresst und möchtest Ruhe im Unterricht.','Der Schüler reagiert auf Hinweise zunehmend genervt.','Du fühlst dich nicht ernst genommen.','Eigentlich möchtest du die Situation ruhig klären.'],
+      goal:['Sprich den Konflikt an.','Versuche ruhig zu bleiben.','Höre dem Schüler zu.','Suche gemeinsam nach einer Lösung.'],
+      focus:['deinen Tonfall','deine Wortwahl','deine Körpersprache','darauf, ob sich der Schüler verstanden fühlt']
+    },
+    beobachter:{
+      title:'Rollenkarte Beobachter/in',
+      intro:'Du beobachtest, wie Kommunikation, Beziehungsgestaltung und Konfliktverlauf im Gespräch wirken.',
+      situation,
+      background:'Du nimmst nicht aktiv am Konfliktgespräch teil, sondern beobachtest möglichst genau. Deine Aufgabe ist es, konkrete Aussagen, Reaktionen und Wendepunkte festzuhalten. Achte darauf, nicht vorschnell zu bewerten. Hilfreich ist, zwischen beobachtbarem Verhalten und eigener Deutung zu unterscheiden: Was wurde gesagt? Wie wurde es gesagt? Wie hat die andere Person darauf reagiert?',
+      situationList:['Du beobachtest das Gespräch aus einer ruhigen Außenperspektive.','Du achtest auf konkrete Aussagen und Reaktionen.','Du unterscheidest Beobachtung und Bewertung.','Du bereitest Hinweise für die gemeinsame Reflexion vor.'],
+      goal:['Achte auf respektvolle Sprache.','Beobachte, ob beide Seiten zuhören.','Notiere, wann Druck entsteht oder abgebaut wird.','Halte fest, welche Aussagen Beziehung fördern oder belasten.'],
+      focus:['Kommunikation','Beziehungsgestaltung','Konfliktverlauf','konkrete Beispiele für die Reflexion']
+    }
+  };
+}
+function setupSituationPopup(){
+  const keyName=document.body.dataset.stepKey||'';
+  if(!/^(schueler|lehrkraft|beobachter)-[234]$/.test(keyName)) return;
+  const hero=document.querySelector('.hero-panel'); if(!hero || hero.querySelector('[data-situation-open]')) return;
+  const btn=document.createElement('button');
+  btn.type='button';
+  btn.className='button ghost small hero-reminder-button';
+  btn.dataset.situationOpen='1';
+  btn.textContent='Zur Erinnerung: Ausgangslage';
+  hero.prepend(btn);
+  const role=roleFromStepKey(); const data=situationData()[role];
+  const ul=arr=>'<ul>'+arr.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>';
+  const open=()=>{
+    let modal=document.querySelector('[data-situation-modal]');
+    if(!modal){modal=document.createElement('div'); modal.className='situation-modal hidden'; modal.dataset.situationModal='1'; document.body.appendChild(modal)}
+    modal.innerHTML=`<section class="situation-dialog" role="dialog" aria-modal="true" aria-label="Zur Erinnerung: Ausgangslage"><p class="eyebrow">Schritt 1</p><h2>${esc(data.title)}</h2><p>${esc(data.intro)}</p><h3>Einführung in die Situation</h3><p>${esc(data.situation)}</p><h3>Hintergrund</h3><p>${esc(data.background)}</p><div class="role-info-grid"><article><h3>Situation</h3>${ul(data.situationList)}</article><article><h3>Ziel</h3>${ul(data.goal)}</article><article><h3>Achte auf</h3>${ul(data.focus)}</article></div><div class="situation-dialog-actions"><button type="button" class="button primary" data-situation-close>OK</button></div></section>`;
+    modal.classList.remove('hidden');
+    const close=()=>modal.classList.add('hidden');
+    modal.querySelector('[data-situation-close]').onclick=close;
+    modal.onclick=e=>{if(e.target===modal)close()};
+  };
+  btn.addEventListener('click',open);
+}
+
 window.addEventListener('beforeunload',()=>{if(!isResetting)saveVisible()});
-document.addEventListener('DOMContentLoaded',()=>{setupWorkBanner();setupStepTimer();setupControls();setupDistribution();setupFields();setupListEditors();setupListPreviews();setupMapping();setupMappingResult();setupTotalTime();setupExport();setupQrCodes()});
+document.addEventListener('DOMContentLoaded',()=>{setupWorkBanner();setupSituationPopup();setupStepTimer();setupControls();setupDistribution();setupFields();setupListEditors();setupListPreviews();setupMapping();setupMappingResult();setupTotalTime();setupExport();setupQrCodes()});
