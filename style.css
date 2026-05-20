@@ -1,0 +1,145 @@
+const nameForm = document.querySelector('#nameForm');
+const nameInput = document.querySelector('#nameInput');
+const nameList = document.querySelector('#nameList');
+const assignBtn = document.querySelector('#assignBtn');
+const results = document.querySelector('#results');
+const message = document.querySelector('#message');
+const sampleBtn = document.querySelector('#sampleBtn');
+const clearBtn = document.querySelector('#clearBtn');
+
+let names = JSON.parse(localStorage.getItem('rollenkartenNames') || '[]');
+
+function saveNames() {
+  localStorage.setItem('rollenkartenNames', JSON.stringify(names));
+}
+
+function renderNames() {
+  nameList.innerHTML = '';
+  if (names.length === 0) {
+    const empty = document.createElement('li');
+    empty.className = 'empty-list';
+    empty.textContent = 'Noch keine Namen eingetragen.';
+    nameList.appendChild(empty);
+    return;
+  }
+
+  names.forEach((name, index) => {
+    const item = document.createElement('li');
+    item.className = 'name-item';
+    item.innerHTML = `<span>${escapeHtml(name)}</span><button type="button" aria-label="${escapeHtml(name)} entfernen">×</button>`;
+    item.querySelector('button').addEventListener('click', () => {
+      names.splice(index, 1);
+      saveNames();
+      renderNames();
+      clearMessage();
+    });
+    nameList.appendChild(item);
+  });
+}
+
+function setMessage(text, type = 'info') {
+  message.textContent = text;
+  message.dataset.type = type;
+}
+
+function clearMessage() {
+  message.textContent = '';
+  message.dataset.type = '';
+}
+
+function escapeHtml(value) {
+  return value.replace(/[&<>'"]/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#039;',
+    '"': '&quot;'
+  }[char]));
+}
+
+function shuffle(array) {
+  const copy = [...array];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function addName(rawName) {
+  const cleaned = rawName.trim().replace(/\s+/g, ' ');
+  if (!cleaned) {
+    setMessage('Bitte gib zuerst einen Namen ein.', 'error');
+    return;
+  }
+  if (names.some(n => n.toLowerCase() === cleaned.toLowerCase())) {
+    setMessage('Dieser Name steht bereits in der Liste.', 'error');
+    return;
+  }
+  names.push(cleaned);
+  saveNames();
+  renderNames();
+  nameInput.value = '';
+  nameInput.focus();
+  setMessage(`${cleaned} wurde hinzugefügt.`, 'success');
+}
+
+function assignRoles() {
+  if (names.length < 2) {
+    setMessage('Für das Rollenspiel werden mindestens zwei Namen benötigt.', 'error');
+    return;
+  }
+
+  const shuffled = shuffle(names);
+  const teacher = shuffled[0];
+  const student = shuffled[1];
+  const observers = shuffled.slice(2);
+
+  results.classList.remove('empty');
+  results.innerHTML = `
+    <div class="assignment-card teacher">
+      <span class="assignment-role">Lehrkraft</span>
+      <strong>${escapeHtml(teacher)}</strong>
+      <a href="rollen/lehrkraft.html">Rollenkarte öffnen</a>
+    </div>
+    <div class="assignment-card student">
+      <span class="assignment-role">Schüler / Schülerin</span>
+      <strong>${escapeHtml(student)}</strong>
+      <a href="rollen/schueler.html">Rollenkarte öffnen</a>
+    </div>
+    <div class="assignment-card observer">
+      <span class="assignment-role">Beobachter</span>
+      ${observers.length ? `<strong>${observers.map(escapeHtml).join(', ')}</strong>` : '<strong>Keine weitere Person eingetragen</strong>'}
+      <a href="rollen/beobachter.html">Rollenkarte öffnen</a>
+    </div>
+  `;
+  setMessage('Die Rollen wurden zufällig verteilt.', 'success');
+}
+
+nameForm?.addEventListener('submit', event => {
+  event.preventDefault();
+  addName(nameInput.value);
+});
+
+assignBtn?.addEventListener('click', assignRoles);
+
+sampleBtn?.addEventListener('click', () => {
+  const sampleNames = ['Mila', 'Noah', 'Lea', 'Emir', 'Sofia'];
+  sampleNames.forEach(name => {
+    if (!names.some(n => n.toLowerCase() === name.toLowerCase())) names.push(name);
+  });
+  saveNames();
+  renderNames();
+  setMessage('Beispielnamen wurden eingefügt.', 'success');
+});
+
+clearBtn?.addEventListener('click', () => {
+  names = [];
+  saveNames();
+  renderNames();
+  results.className = 'results empty';
+  results.innerHTML = '<p>Noch keine Zuordnung. Trage mindestens zwei Namen ein und starte die Verteilung.</p>';
+  setMessage('Die Liste wurde geleert.', 'success');
+});
+
+renderNames();
