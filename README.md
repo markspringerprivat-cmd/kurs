@@ -2,18 +2,25 @@
 
 Statische Webseite für GitHub Pages.
 
-## Upload auf GitHub
+## Dateien
 
-Alle Dateien aus diesem Ordner müssen direkt in das Repository geladen werden. Die `index.html` muss auf der obersten Ebene liegen.
+Alle Dateien müssen direkt auf oberster Repository-Ebene liegen:
 
-Benötigte Dateien:
+- index.html
+- style.css
+- script.js
+- schueler.html
+- lehrkraft.html
+- beobachter.html
+- reflexion.html
+- README.md
 
-- `index.html`
-- `style.css`
-- `script.js`
-- `schueler.html`
-- `lehrkraft.html`
-- `beobachter.html`
-- `reflexion.html`
+## Funktionen
 
-Die Webseite speichert Namen, Rollenverteilung, Notizen und Reflexionsbogen lokal im Browser. Über den Button „Webseite zurücksetzen“ werden diese Einträge gelöscht.
+- Namen eintragen und zufällige Rollenverteilung starten
+- Rollen: Lehrkraft, Schüler/in, Beobachter/in
+- Rollenkarten mit Notizfeld
+- Reflexionsbogen
+- automatische Speicherung im Browser über localStorage mit Cookie-Fallback
+- kompletter Reset über „Webseite zurücksetzen“
+- Export des gesamten Arbeitsstands als PDF oder DOCX

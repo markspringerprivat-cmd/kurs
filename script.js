@@ -1,4 +1,6 @@
-const STORAGE_PREFIX = 'rollenkarten-v3-';
+const STORAGE_PREFIX = 'rollenkarten-v5-';
+const LEGACY_STORAGE_PREFIXES = ['rollenkarten-v3-', 'rollenkarten-v4-', 'rollenkarten-v2-', 'rollenkarten-'];
+let isResetting = false;
 const COOKIE_DAYS = 60;
 
 let names = [];
@@ -222,26 +224,37 @@ function saveAllVisibleInputs() {
   showSaveStatus('Alles gespeichert');
 }
 
+function allStoragePrefixes() {
+  return [STORAGE_PREFIX, ...LEGACY_STORAGE_PREFIXES];
+}
+
+function hasKnownPrefix(key) {
+  return allStoragePrefixes().some(prefix => key.startsWith(prefix));
+}
+
 function clearCookies() {
   try {
     document.cookie.split(';').forEach(cookie => {
       const eqPos = cookie.indexOf('=');
       const name = eqPos > -1 ? cookie.slice(0, eqPos).trim() : cookie.trim();
-      if (name.startsWith(STORAGE_PREFIX)) {
+      if (hasKnownPrefix(name)) {
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${location.pathname}; SameSite=Lax`;
       }
     });
   } catch {}
 }
 
 function resetWebsite() {
+  isResetting = true;
+  document.querySelectorAll('[data-save-key]').forEach(field => { field.value = ''; });
   try {
     Object.keys(localStorage)
-      .filter(key => key.startsWith(STORAGE_PREFIX))
+      .filter(hasKnownPrefix)
       .forEach(key => localStorage.removeItem(key));
   } catch {}
   clearCookies();
-  window.location.href = 'index.html';
+  window.location.replace('index.html');
 }
 
 function setupTopbarStorageControls() {
@@ -282,11 +295,202 @@ function setupReset() {
   });
 }
 
-window.addEventListener('beforeunload', saveAllVisibleInputs);
+window.addEventListener('beforeunload', () => {
+  if (!isResetting) saveAllVisibleInputs();
+});
+
+
+function getSaved(key, fallback = '') {
+  return loadValue(key, fallback);
+}
+
+function getExportData() {
+  return {
+    names: loadJson('names', []),
+    assignments: loadJson('assignments', []),
+    notes: {
+      'Schüler/in': getSaved('notes-schueler'),
+      'Lehrkraft': getSaved('notes-lehrkraft'),
+      'Beobachter/in': getSaved('notes-beobachter')
+    },
+    reflection: {
+      'Was ist im Gespräch passiert?': getSaved('reflexion-verlauf'),
+      'Welche Aussagen oder Verhaltensweisen haben die Beziehung gefördert?': getSaved('reflexion-foerdernd'),
+      'Welche Aussagen oder Verhaltensweisen haben den Konflikt verschärft?': getSaved('reflexion-belastend'),
+      'Wie haben Tonfall, Wortwahl und Körpersprache gewirkt?': getSaved('reflexion-wirkung'),
+      'Was könnte beim nächsten Gespräch anders oder besser gemacht werden?': getSaved('reflexion-verbesserung')
+    }
+  };
+}
+
+function textOrDash(value) {
+  return value && value.trim() ? value.trim() : '—';
+}
+
+function buildExportHtml() {
+  const data = getExportData();
+  const assignmentRows = data.assignments.length
+    ? data.assignments.map(item => `<tr><td>${escapeHtml(item.role)}</td><td>${escapeHtml(item.name)}</td></tr>`).join('')
+    : '<tr><td colspan="2">Noch keine Rollenverteilung gespeichert.</td></tr>';
+
+  const nameList = data.names.length
+    ? data.names.map(name => `<li>${escapeHtml(name)}</li>`).join('')
+    : '<li>Keine Namen gespeichert.</li>';
+
+  const notes = Object.entries(data.notes).map(([title, value]) => `
+    <section>
+      <h3>${escapeHtml(title)}</h3>
+      <p>${escapeHtml(textOrDash(value)).replace(/\n/g, '<br>')}</p>
+    </section>
+  `).join('');
+
+  const reflection = Object.entries(data.reflection).map(([title, value]) => `
+    <section>
+      <h3>${escapeHtml(title)}</h3>
+      <p>${escapeHtml(textOrDash(value)).replace(/\n/g, '<br>')}</p>
+    </section>
+  `).join('');
+
+  return `<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Export Rollenverteilung</title>
+<style>
+  body { font-family: Arial, sans-serif; color: #1f2528; line-height: 1.45; margin: 36px; }
+  h1 { font-size: 28px; margin: 0 0 18px; }
+  h2 { font-size: 21px; margin: 28px 0 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+  h3 { font-size: 16px; margin: 16px 0 5px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { border: 1px solid #bbb; text-align: left; padding: 8px; vertical-align: top; }
+  p { white-space: normal; margin: 0; }
+  section { break-inside: avoid; }
+</style>
+</head>
+<body>
+  <h1>Rollenverteilung für das Rollenspiel</h1>
+  <h2>Eingetragene Namen</h2>
+  <ul>${nameList}</ul>
+  <h2>Rollenverteilung</h2>
+  <table><thead><tr><th>Rolle</th><th>Name</th></tr></thead><tbody>${assignmentRows}</tbody></table>
+  <h2>Notizen</h2>
+  ${notes}
+  <h2>Reflexionsbogen</h2>
+  ${reflection}
+</body>
+</html>`;
+}
+
+function exportPdf() {
+  saveAllVisibleInputs();
+  const popup = window.open('', '_blank');
+  if (!popup) {
+    alert('Der PDF-Export wurde vom Browser blockiert. Bitte Pop-ups für diese Seite erlauben.');
+    return;
+  }
+  popup.document.open();
+  popup.document.write(buildExportHtml());
+  popup.document.close();
+  popup.focus();
+  setTimeout(() => popup.print(), 300);
+}
+
+function crc32(str) {
+  const table = crc32.table || (crc32.table = Array.from({ length: 256 }, (_, n) => {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
+    return c >>> 0;
+  }));
+  let crc = 0 ^ -1;
+  for (let i = 0; i < str.length; i++) crc = (crc >>> 8) ^ table[(crc ^ str.charCodeAt(i)) & 0xFF];
+  return (crc ^ -1) >>> 0;
+}
+
+function toBytes(str) {
+  return new TextEncoder().encode(str);
+}
+
+function zipStored(files) {
+  const chunks = [];
+  const central = [];
+  let offset = 0;
+  const u16 = n => [n & 255, (n >>> 8) & 255];
+  const u32 = n => [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255];
+
+  files.forEach(file => {
+    const nameBytes = toBytes(file.name);
+    const data = toBytes(file.content);
+    const crc = crc32(String.fromCharCode(...data));
+    const local = new Uint8Array([
+      ...u32(0x04034b50), ...u16(20), ...u16(0), ...u16(0), ...u16(0), ...u16(0),
+      ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(nameBytes.length), ...u16(0)
+    ]);
+    chunks.push(local, nameBytes, data);
+    central.push({ nameBytes, crc, size: data.length, offset });
+    offset += local.length + nameBytes.length + data.length;
+  });
+
+  const centralStart = offset;
+  central.forEach(file => {
+    const entry = new Uint8Array([
+      ...u32(0x02014b50), ...u16(20), ...u16(20), ...u16(0), ...u16(0), ...u16(0), ...u16(0),
+      ...u32(file.crc), ...u32(file.size), ...u32(file.size), ...u16(file.nameBytes.length), ...u16(0), ...u16(0),
+      ...u16(0), ...u16(0), ...u32(0), ...u32(file.offset)
+    ]);
+    chunks.push(entry, file.nameBytes);
+    offset += entry.length + file.nameBytes.length;
+  });
+  const centralSize = offset - centralStart;
+  chunks.push(new Uint8Array([
+    ...u32(0x06054b50), ...u16(0), ...u16(0), ...u16(central.length), ...u16(central.length),
+    ...u32(centralSize), ...u32(centralStart), ...u16(0)
+  ]));
+  return new Blob(chunks, { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+}
+
+function wordXml() {
+  const html = buildExportHtml()
+    .replace(/<br>/g, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+  const lines = html.split(/\n+/).map(line => line.trim()).filter(Boolean);
+  const paragraphs = lines.map(line => `<w:p><w:r><w:t xml:space="preserve">${escapeXml(line)}</w:t></w:r></w:p>`).join('');
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${paragraphs}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr></w:body></w:document>`;
+}
+
+function escapeXml(value) {
+  return String(value).replace(/[<>&"']/g, char => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[char]));
+}
+
+function exportDocx() {
+  saveAllVisibleInputs();
+  const blob = zipStored([
+    { name: '[Content_Types].xml', content: '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>' },
+    { name: '_rels/.rels', content: '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>' },
+    { name: 'word/document.xml', content: wordXml() }
+  ]);
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'rollenspiel-reflexion.docx';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
+function setupExports() {
+  document.querySelector('[data-export-pdf]')?.addEventListener('click', exportPdf);
+  document.querySelector('[data-export-docx]')?.addEventListener('click', exportDocx);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   setupTopbarStorageControls();
   setupHome();
   setupAutosaveFields();
   setupReset();
+  setupExports();
 });

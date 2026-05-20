@@ -376,3 +376,30 @@ li + li { margin-top: 6px; }
 .save-status.visible {
   opacity: 1;
 }
+
+.export-panel {
+  margin: 0 clamp(18px, 3vw, 34px) clamp(26px, 3vw, 42px);
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(234,223,207,0.55));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+.export-panel h2 { font-size: clamp(1.45rem, 2.4vw, 2.1rem); margin-bottom: 8px; }
+.export-panel p:not(.eyebrow) { margin: 0; color: #435052; }
+.export-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+
+@media (max-width: 760px) {
+  .export-panel { align-items: stretch; flex-direction: column; }
+  .export-actions { justify-content: stretch; }
+}
+
+@media print {
+  .topbar, .card-actions, .export-panel, .notes-card { display: none !important; }
+  body { background: #fff; }
+  .role-main, .page-shell { width: 100%; margin: 0; }
+  .role-page-card, .reflection-card, .info-box { box-shadow: none; border-color: #ccc; }
+}
