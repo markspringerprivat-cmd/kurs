@@ -17,7 +17,14 @@ function setupListPreviews(){$$('[data-list-preview]').forEach(ul=>{const arr=li
 function clearAll(){isResetting=true;try{Object.keys(localStorage).filter(k=>[STORAGE_PREFIX,...LEGACY].some(p=>k.startsWith(p))).forEach(k=>localStorage.removeItem(k))}catch(e){} location.replace('index.html')}
 function setupControls(){$$('[data-save-now]').forEach(b=>b.onclick=()=>{saveVisible();status('Alles gespeichert')}); $$('[data-reset]').forEach(b=>b.onclick=()=>{if(confirm('Alle Eingaben, Reflexionen und Zuordnungen löschen?')) clearAll()})}
 function saveVisible(){$$('[data-save-key]').forEach(el=>save(el.dataset.saveKey,el.value||'')); try{save('names',names);save('assignments',assignments)}catch(e){}}
-function reflectionEntries(){const keys=['reflexion-verlauf','reflexion-foerdernd','reflexion-belastend','reflexion-wirkung','reflexion-verbesserung']; let arr=[]; keys.forEach(k=>listGet(k).forEach((text,i)=>arr.push({id:k+'-'+i,text,source:k}))); return arr}
+function reflectionSourceLabels(){return {
+  'reflexion-verlauf':'Was ist im Gespräch passiert?',
+  'reflexion-foerdernd':'Welche Aussagen oder Verhaltensweisen haben die Beziehung gefördert?',
+  'reflexion-belastend':'Welche Aussagen oder Verhaltensweisen haben den Konflikt verschärft?',
+  'reflexion-wirkung':'Wie haben Tonfall, Wortwahl und Körpersprache gewirkt?',
+  'reflexion-verbesserung':'Was könnte beim nächsten Gespräch anders gemacht werden?'
+}}
+function reflectionEntries(){const labels=reflectionSourceLabels(); const keys=Object.keys(labels); let arr=[]; keys.forEach(k=>listGet(k).forEach((text,i)=>arr.push({id:k+'-'+i,text,source:k,sourceLabel:labels[k]}))); return arr}
 function setupMapping(){const pool=$('#statementPool'); if(!pool)return; const cats=['sicherheit','naehe-distanz','kommunikation','kontext','kooperation']; let map=json('theorie-map',{}); cats.forEach(c=>{if(!map[c])map[c]=[]}); const assigned=new Set(Object.values(map).flat()); function itemHtml(item){const div=document.createElement('div');div.className='drag-item';div.draggable=true;div.dataset.id=item.id;div.textContent=item.text;div.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',item.id));return div} const all=reflectionEntries(); function render(){pool.innerHTML=''; all.filter(i=>!assigned.has(i.id)).forEach(i=>pool.appendChild(itemHtml(i))); if(!pool.children.length)pool.innerHTML='<p class="muted">Keine freien Reflexionssätze. Ergänze im Reflexionsbogen einzelne Sätze oder entferne Zuordnungen.</p>'; $$('.drop-card').forEach(card=>{const zone=$('.drop-zone',card),c=card.dataset.drop;zone.innerHTML='';(map[c]||[]).forEach(id=>{const it=all.find(x=>x.id===id);if(!it)return;const div=itemHtml(it);div.title='Doppelklick zum Entfernen';div.ondblclick=()=>{map[c]=map[c].filter(x=>x!==id);assigned.delete(id);save('theorie-map',map);render()};zone.appendChild(div)}); if(!zone.children.length)zone.innerHTML='<p class="muted">Hier ablegen.</p>'})} $$('.drop-card').forEach(card=>{card.addEventListener('dragover',e=>{e.preventDefault();card.classList.add('drag-over')});card.addEventListener('dragleave',()=>card.classList.remove('drag-over'));card.addEventListener('drop',e=>{e.preventDefault();card.classList.remove('drag-over');const id=e.dataTransfer.getData('text/plain');if(!id)return;cats.forEach(c=>map[c]=map[c].filter(x=>x!==id));map[card.dataset.drop].push(id);assigned.add(id);save('theorie-map',map);render()})}); const resultBtn=$('[data-show-mapping-result]')||$('[data-save-mapping]'); resultBtn?.addEventListener('click',()=>{save('theorie-map',map); location.href='theorie-ergebnis.html'}); render()}
 
 function setupExport(){const pdf=$('[data-export-pdf]'),doc=$('[data-export-doc]'); if(!pdf&&!doc)return; const cats=[['Verlauf','reflexion-verlauf'],['Beziehungsfördernd','reflexion-foerdernd'],['Konfliktverschärfend','reflexion-belastend'],['Wirkung von Sprache und Körper','reflexion-wirkung'],['Verbesserung','reflexion-verbesserung']]; const build=()=>{const ass=json('assignments',[]); return `<html><head><meta charset="utf-8"><title>Reflexionsbogen</title><style>body{font-family:Arial,sans-serif;padding:30px;line-height:1.5;color:#20272b}h1{font-size:30px}h2{margin-top:24px}table{border-collapse:collapse;width:100%;margin:12px 0}td,th{border:1px solid #ddd;padding:8px;text-align:left}li{margin:6px 0}</style></head><body><h1>Reflexionsbogen</h1><h2>Rollenverteilung</h2><table><tr><th>Rolle</th><th>Name</th></tr>${ass.map(a=>`<tr><td>${esc(a.role)}</td><td>${esc(a.name)}</td></tr>`).join('')}</table>${cats.map(([t,k])=>`<h2>${t}</h2><ul>${listGet(k).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>—</li>'}</ul>`).join('')}</body></html>`}; pdf.onclick=()=>{const w=open('','_blank');w.document.write(build());w.document.close();setTimeout(()=>w.print(),250)}; doc.onclick=()=>{const blob=buildDocxBlob();const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rollenspiel-reflexionsbogen.docx';a.click();URL.revokeObjectURL(a.href)}}
@@ -73,12 +80,41 @@ function setupMappingResult(){
   const entries=reflectionEntries();
   const map=json('theorie-map',{});
   const byId=Object.fromEntries(entries.map(e=>[e.id,e]));
-  left.innerHTML=entries.length?entries.map(e=>`<li>${esc(e.text)}</li>`).join(''):'<li class="muted-row">Noch keine Reflexionssätze eingetragen.</li>';
+  left.innerHTML=entries.length?entries.map(e=>`<li><span class="result-statement-text">${esc(e.text)}</span><small class="result-source">${esc(e.sourceLabel||'Reflexionsbogen')}</small></li>`).join(''):'<li class="muted-row">Noch keine Reflexionssätze eingetragen.</li>';
   right.innerHTML=mappingCategories().map(([id,title])=>{
     const items=(map[id]||[]).map(x=>byId[x]).filter(Boolean);
     return `<section class="result-category"><h3>${esc(title)}</h3><ul>${items.length?items.map(i=>`<li>${esc(i.text)}</li>`).join(''):'<li class="muted-row">Noch keine Sätze zugeordnet.</li>'}</ul></section>`;
   }).join('');
 }
 
+
+function fmtTime(ms){ms=Math.max(0,Math.round(ms/1000));const m=Math.floor(ms/60),s=ms%60;return `${m}:${String(s).padStart(2,'0')}`}
+function timerLabel(key){const labels={
+  'rollenverteilung':'Rollenverteilung',
+  'reflexion':'Reflexionsbogen',
+  'theorie-zuordnung':'Theorie-Zuordnung'
+}; if(labels[key]) return labels[key]; const m=key.match(/^(schueler|lehrkraft|beobachter)-(\d)$/); if(m){const role={schueler:'Schüler/in',lehrkraft:'Lehrkraft',beobachter:'Beobachter/in'}[m[1]]; return `${role} · Schritt ${m[2]}`} return key}
+function setupStepTimer(){
+  const keyName=document.body.dataset.stepKey; const durSec=Number(document.body.dataset.stepDuration||0); if(!keyName||!durSec) return;
+  const box=document.createElement('div'); box.className='step-timer'; box.innerHTML=`<span class="timer-dot"></span><span class="timer-label">${esc(timerLabel(keyName))}</span><strong data-timer-left>${fmtTime(durSec*1000)}</strong>`; document.body.appendChild(box);
+  const startKey='timer-start-'+keyName, usedKey='timer-used-'+keyName, warnedKey='timer-warned-'+keyName;
+  let start=Number(load(startKey,'')); if(!start || Date.now()-start > durSec*1000*4){start=Date.now(); save(startKey,String(start)); save(warnedKey,'0')}
+  const leftEl=$('[data-timer-left]',box);
+  const tick=()=>{
+    const elapsed=Date.now()-start; const left=durSec*1000-elapsed; leftEl.textContent=left>0?fmtTime(left):'Zeit abgelaufen';
+    box.classList.toggle('expired',left<=0); box.classList.toggle('soon',left>0 && left<=30000);
+    if(left<=30000 && left>25000 && load(warnedKey,'0')!=='1'){
+      save(warnedKey,'1'); showTimerNotice('In 30 Sekunden sollte die Gruppe zum nächsten Schritt übergehen.');
+    }
+    try{localStorage.setItem(key('timer-used-'+keyName), String(Math.max(Number(load(usedKey,'0'))||0, elapsed)))}catch(e){}
+  };
+  tick(); setInterval(tick,1000);
+}
+function showTimerNotice(text){
+  let n=document.querySelector('.timer-notice'); if(!n){n=document.createElement('div');n.className='timer-notice';document.body.appendChild(n)}
+  n.textContent=text; n.classList.add('visible'); clearTimeout(showTimerNotice.t); showTimerNotice.t=setTimeout(()=>n.classList.remove('visible'),5500);
+}
+function setupTotalTime(){const el=document.querySelector('[data-total-time]'); if(!el) return; const keys=['rollenverteilung','schueler-1','lehrkraft-1','beobachter-1','schueler-2','lehrkraft-2','beobachter-2','schueler-3','lehrkraft-3','beobachter-3','schueler-4','lehrkraft-4','beobachter-4','reflexion','theorie-zuordnung']; let total=0; keys.forEach(k=>{total+=Number(load('timer-used-'+k,'0'))||0}); el.textContent=total?`Bisher benötigte Arbeitszeit: ca. ${fmtTime(total)}`:'Bisher wurde noch keine Arbeitszeit erfasst.'}
+
 window.addEventListener('beforeunload',()=>{if(!isResetting)saveVisible()});
-document.addEventListener('DOMContentLoaded',()=>{setupWorkBanner();setupControls();setupDistribution();setupFields();setupListEditors();setupListPreviews();setupMapping();setupMappingResult();setupExport();setupQrCodes()});
+document.addEventListener('DOMContentLoaded',()=>{setupWorkBanner();setupStepTimer();setupControls();setupDistribution();setupFields();setupListEditors();setupListPreviews();setupMapping();setupMappingResult();setupTotalTime();setupExport();setupQrCodes()});
