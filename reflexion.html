@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reflexionsbogen</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+<body data-page="reflection">
+  <header class="role-header topbar">
+    <a class="brand" href="index.html">Rollenverteilung</a>
+    <div class="top-actions">
+      <a class="back-link" href="index.html">Zurück zur Verteilung</a>
+      <button class="reset-button" type="button" data-reset>Webseite zurücksetzen</button>
+    </div>
+  </header>
+
+  <main class="role-main">
+    <article class="reflection-card">
+      <section class="reflection-hero">
+        <p class="eyebrow">Auswertung</p>
+        <h1>Reflexionsbogen</h1>
+        <p>Nutze den Bogen nach dem Rollenspiel, um Gesprächsverlauf, Wirkung und mögliche Verbesserungen festzuhalten.</p>
+      </section>
+
+      <form class="reflection-form">
+        <label>
+          <span>Was ist im Gespräch passiert?</span>
+          <textarea data-save-key="reflexion-verlauf" placeholder="Beschreibe den Ablauf kurz und sachlich."></textarea>
+        </label>
+        <label>
+          <span>Welche Aussagen oder Verhaltensweisen haben die Beziehung gefördert?</span>
+          <textarea data-save-key="reflexion-foerdernd" placeholder="Notiere konkrete Beispiele."></textarea>
+        </label>
+        <label>
+          <span>Welche Aussagen oder Verhaltensweisen haben den Konflikt verschärft?</span>
+          <textarea data-save-key="reflexion-belastend" placeholder="Notiere konkrete Beispiele."></textarea>
+        </label>
+        <label>
+          <span>Wie haben Tonfall, Wortwahl und Körpersprache gewirkt?</span>
+          <textarea data-save-key="reflexion-wirkung" placeholder="Beschreibe, was du beobachtet hast."></textarea>
+        </label>
+        <label>
+          <span>Was könnte beim nächsten Gespräch anders oder besser gemacht werden?</span>
+          <textarea data-save-key="reflexion-verbesserung" placeholder="Formuliere konkrete Ideen für eine bessere Gesprächsführung."></textarea>
+        </label>
+      </form>
+    </article>
+  </main>
+</body>
+</html>

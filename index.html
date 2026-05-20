@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rollenverteilung für das Rollenspiel</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+<body data-page="home">
+  <header class="hero compact-hero">
+    <nav class="topbar" aria-label="Seitennavigation">
+      <a class="brand" href="index.html">Rollenverteilung</a>
+      <button class="reset-button" type="button" data-reset>Webseite zurücksetzen</button>
+    </nav>
+    <section class="hero-content">
+      <p class="eyebrow">Unterricht · Konfliktgespräch · Reflexion</p>
+      <h1 class="single-line-title">Rollenverteilung für das Rollenspiel</h1>
+      <p>Trage Namen ein und lasse die Rollen zufällig verteilen. Eine Person wird Lehrkraft, eine Person Schüler/in, alle weiteren Personen werden Beobachter/innen.</p>
+    </section>
+  </header>
+
+  <main class="page-shell">
+    <section class="panel distribution-panel" aria-labelledby="verteilen-title">
+      <div class="section-heading">
+        <p class="eyebrow">Zufallsauswahl</p>
+        <h2 id="verteilen-title">Namen eintragen und Rollen verteilen</h2>
+      </div>
+
+      <div class="distribution-grid">
+        <form class="name-card" id="nameForm">
+          <label for="nameInput">Name hinzufügen</label>
+          <div class="input-row">
+            <input id="nameInput" type="text" autocomplete="off" placeholder="z. B. Mia" />
+            <button class="button secondary" type="submit">Hinzufügen</button>
+          </div>
+          <p class="hint">Mindestens zwei Namen werden benötigt.</p>
+          <ul class="name-list" id="nameList" aria-live="polite"></ul>
+          <div class="actions">
+            <button class="button primary" id="assignButton" type="button">Zufällig verteilen</button>
+            <button class="button ghost" id="clearButton" type="button">Liste leeren</button>
+          </div>
+        </form>
+
+        <section class="result-card" aria-labelledby="result-title">
+          <h3 id="result-title">Aktuelle Verteilung</h3>
+          <div class="results" id="results">
+            <p class="empty-state">Noch keine Verteilung. Trage Namen ein und starte die Zufallsauswahl.</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="situation-card">
+      <div>
+        <p class="eyebrow">Situation</p>
+        <h2>Ausgangslage des Rollenspiels</h2>
+      </div>
+      <p>Während des Unterrichts nutzt ein Schüler wiederholt sein Handy. Die Lehrkraft hat ihn bereits mehrfach darauf hingewiesen. Der Schüler reagiert zunehmend genervt und fühlt sich unfair behandelt. Die Lehrkraft fühlt sich gleichzeitig nicht ernst genommen und möchte die Situation klären. Ziel des Rollenspiels ist es, die Konfliktsituation darzustellen und anschließend gemeinsam zu reflektieren, welche Aussagen und Verhaltensweisen die Beziehung fördern oder belasten.</p>
+    </section>
+
+    <section class="role-links" aria-labelledby="karten-title">
+      <div class="section-heading centered">
+        <p class="eyebrow">Material</p>
+        <h2 id="karten-title">Rollenkarten</h2>
+      </div>
+      <div class="tiles">
+        <a class="tile student" href="schueler.html">
+          <h3>Schüler/in</h3>
+          <p>Erklärt die eigene Sichtweise und achtet auf die Wirkung der Reaktionen.</p>
+        </a>
+        <a class="tile teacher" href="lehrkraft.html">
+          <h3>Lehrkraft</h3>
+          <p>Spricht den Konflikt an, bleibt ruhig und sucht eine gemeinsame Lösung.</p>
+        </a>
+        <a class="tile observer" href="beobachter.html">
+          <h3>Beobachter/in</h3>
+          <p>Beobachtet Kommunikation, Beziehungsgestaltung und Konfliktverlauf.</p>
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
