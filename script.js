@@ -80,42 +80,37 @@ function setupMappingResult(){
   const entries=reflectionEntries();
   const map=json('theorie-map',{});
   const byId=Object.fromEntries(entries.map(e=>[e.id,e]));
-  left.innerHTML=entries.length?entries.map(e=>`<li><span class="result-statement-text">${esc(e.text)}</span><small class="result-source">${esc(e.sourceLabel||'Reflexionsbogen')}</small></li>`).join(''):'<li class="muted-row">Noch keine Reflexionssätze eingetragen.</li>';
+  const grouped={};
+  entries.forEach(e=>{const label=e.sourceLabel||'Reflexionsbogen'; (grouped[label] ||= []).push(e)});
+  const labels=Object.values(reflectionSourceLabels());
+  const groupHtml=labels.filter(label=>grouped[label]?.length).map(label=>`<li class="result-question-group"><span class="result-source result-question">${esc(label)}</span><ul>${grouped[label].map(e=>`<li><span class="result-statement-text">${esc(e.text)}</span></li>`).join('')}</ul></li>`).join('');
+  left.innerHTML=groupHtml || '<li class="muted-row">Noch keine Reflexionssätze eingetragen.</li>';
   right.innerHTML=mappingCategories().map(([id,title])=>{
     const items=(map[id]||[]).map(x=>byId[x]).filter(Boolean);
     return `<section class="result-category"><h3>${esc(title)}</h3><ul>${items.length?items.map(i=>`<li>${esc(i.text)}</li>`).join(''):'<li class="muted-row">Noch keine Sätze zugeordnet.</li>'}</ul></section>`;
   }).join('');
 }
 
-
 function fmtTime(ms){ms=Math.max(0,Math.round(ms/1000));const m=Math.floor(ms/60),s=ms%60;return `${m}:${String(s).padStart(2,'0')}`}
-function timerLabel(key){const labels={
-  'rollenverteilung':'Rollenverteilung',
-  'reflexion':'Reflexionsbogen',
-  'theorie-zuordnung':'Theorie-Zuordnung'
-}; if(labels[key]) return labels[key]; const m=key.match(/^(schueler|lehrkraft|beobachter)-(\d)$/); if(m){const role={schueler:'Schüler/in',lehrkraft:'Lehrkraft',beobachter:'Beobachter/in'}[m[1]]; return `${role} · Schritt ${m[2]}`} return key}
 function setupStepTimer(){
-  const keyName=document.body.dataset.stepKey; const durSec=Number(document.body.dataset.stepDuration||0); if(!keyName||!durSec) return;
-  const box=document.createElement('div'); box.className='step-timer'; box.innerHTML=`<span class="timer-dot"></span><span class="timer-label">${esc(timerLabel(keyName))}</span><strong data-timer-left>${fmtTime(durSec*1000)}</strong>`; document.body.appendChild(box);
-  const startKey='timer-start-'+keyName, usedKey='timer-used-'+keyName, warnedKey='timer-warned-'+keyName;
-  let start=Number(load(startKey,'')); if(!start || Date.now()-start > durSec*1000*4){start=Date.now(); save(startKey,String(start)); save(warnedKey,'0')}
-  const leftEl=$('[data-timer-left]',box);
-  const tick=()=>{
-    const elapsed=Date.now()-start; const left=durSec*1000-elapsed; leftEl.textContent=left>0?fmtTime(left):'Zeit abgelaufen';
-    box.classList.toggle('expired',left<=0); box.classList.toggle('soon',left>0 && left<=30000);
-    if(left<=30000 && left>25000 && load(warnedKey,'0')!=='1'){
-      save(warnedKey,'1'); showTimerNotice('In 30 Sekunden sollte die Gruppe zum nächsten Schritt übergehen.');
-    }
-    try{localStorage.setItem(key('timer-used-'+keyName), String(Math.max(Number(load(usedKey,'0'))||0, elapsed)))}catch(e){}
-  };
+  const keyName=document.body.dataset.stepKey;
+  if(keyName==='rollenverteilung' && !load('global-timer-start','')) save('global-timer-start',String(Date.now()));
+  const start=Number(load('global-timer-start',''));
+  if(!start) return;
+  const box=document.createElement('div');
+  box.className='step-timer elapsed-timer';
+  box.innerHTML='<span class="timer-dot"></span><span class="timer-label">Arbeitszeit</span><strong data-timer-left>0:00</strong>';
+  document.body.appendChild(box);
+  const out=$('[data-timer-left]',box);
+  const tick=()=>{out.textContent=fmtTime(Date.now()-start)};
   tick(); setInterval(tick,1000);
 }
-function showTimerNotice(text){
-  let n=document.querySelector('.timer-notice'); if(!n){n=document.createElement('div');n.className='timer-notice';document.body.appendChild(n)}
-  n.textContent=text; n.classList.add('visible'); clearTimeout(showTimerNotice.t); showTimerNotice.t=setTimeout(()=>n.classList.remove('visible'),5500);
+function setupTotalTime(){
+  const el=document.querySelector('[data-total-time]'); if(!el) return;
+  const start=Number(load('global-timer-start',''));
+  const render=()=>{el.textContent=start?`Bisher benötigte Arbeitszeit: ca. ${fmtTime(Date.now()-start)}`:'Bisher wurde noch keine Arbeitszeit erfasst.'};
+  render(); if(start) setInterval(render,1000);
 }
-function setupTotalTime(){const el=document.querySelector('[data-total-time]'); if(!el) return; const keys=['rollenverteilung','schueler-1','lehrkraft-1','beobachter-1','schueler-2','lehrkraft-2','beobachter-2','schueler-3','lehrkraft-3','beobachter-3','schueler-4','lehrkraft-4','beobachter-4','reflexion','theorie-zuordnung']; let total=0; keys.forEach(k=>{total+=Number(load('timer-used-'+k,'0'))||0}); el.textContent=total?`Bisher benötigte Arbeitszeit: ca. ${fmtTime(total)}`:'Bisher wurde noch keine Arbeitszeit erfasst.'}
-
 
 function roleFromStepKey(){
   const keyName=document.body.dataset.stepKey||'';
