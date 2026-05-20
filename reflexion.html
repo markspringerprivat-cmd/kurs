@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reflexionsbogen</title>
+  <link rel="stylesheet" href="style.css?v=7" />
+  <script src="script.js?v=7" defer></script>
+</head>
+<body data-page="reflection">
+  <header class="role-header topbar">
+    <a class="brand" href="index.html">Rollenspiel</a>
+    <div class="top-actions">
+      <a class="back-link" href="rollenkarten.html">Zurück zu den Rollenkarten</a>
+      <button class="reset-button" type="button" data-reset>Webseite zurücksetzen</button>
+    </div>
+  </header>
+
+  <main class="role-main">
+    <article class="reflection-card">
+      <section class="reflection-hero">
+        <p class="eyebrow">Auswertung</p>
+        <h1>Reflexionsbogen</h1>
+        <p>Nutze den Bogen nach dem Rollenspiel, um Gesprächsverlauf, Wirkung und mögliche Verbesserungen festzuhalten.</p>
+      </section>
+
+      <form class="reflection-form">
+        <label>
+          <span>Was ist im Gespräch passiert?</span>
+          <textarea data-save-key="reflexion-verlauf" placeholder="Beschreibe den Ablauf kurz und sachlich."></textarea>
+        </label>
+        <label>
+          <span>Welche Aussagen oder Verhaltensweisen haben die Beziehung gefördert?</span>
+          <textarea data-save-key="reflexion-foerdernd" placeholder="Notiere konkrete Beispiele."></textarea>
+        </label>
+        <label>
+          <span>Welche Aussagen oder Verhaltensweisen haben den Konflikt verschärft?</span>
+          <textarea data-save-key="reflexion-belastend" placeholder="Notiere konkrete Beispiele."></textarea>
+        </label>
+        <label>
+          <span>Wie haben Tonfall, Wortwahl und Körpersprache gewirkt?</span>
+          <textarea data-save-key="reflexion-wirkung" placeholder="Beschreibe, was du beobachtet hast."></textarea>
+        </label>
+        <label>
+          <span>Was könnte beim nächsten Gespräch anders oder besser gemacht werden?</span>
+          <textarea data-save-key="reflexion-verbesserung" placeholder="Formuliere konkrete Ideen für eine bessere Gesprächsführung."></textarea>
+        </label>
+      </form>
+
+      <section class="export-panel" aria-labelledby="export-title">
+        <div>
+          <p class="eyebrow">Export</p>
+          <h2 id="export-title">Ergebnisse sichern</h2>
+          <p>Exportiert werden die Rollenverteilung und die Einträge aus dem Reflexionsbogen. Notizen werden nicht übernommen.</p>
+        </div>
+        <div class="export-actions">
+          <button class="button primary" type="button" data-export-pdf>Als PDF exportieren</button>
+          <button class="button secondary" type="button" data-export-docx>Als DOCX exportieren</button>
+        </div>
+      </section>
+    </article>
+  </main>
+</body>
+</html>
