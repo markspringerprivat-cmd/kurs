@@ -324,3 +324,62 @@ body[data-work]::before{display:none!important;content:none!important;}
 .start-card small{
   margin-top:0 !important;
 }
+
+
+/* Update 17: kein Hintergrund-Verlauf, keine Rollenspiel-Brand, globaler Hochzähl-Timer */
+html, body{
+  min-height:100%;
+  background:var(--bg) !important;
+}
+body{
+  background:var(--bg) !important;
+  background-image:none !important;
+}
+.site-header .brand{display:none!important;}
+.header-spacer{width:1px;height:1px;}
+.site-header{justify-content:space-between;}
+.start-card,
+.info-card,
+.primary-card,
+.secondary-card{
+  justify-content:center !important;
+  align-items:flex-start;
+  padding-top:24px !important;
+  padding-bottom:24px !important;
+}
+.primary-card{min-height:220px !important;}
+.secondary-card{min-height:190px !important;}
+.info-card{min-height:165px !important;}
+.global-timer{
+  position:fixed;
+  right:18px;
+  top:78px;
+  z-index:80;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:10px 14px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(255,254,250,.94);
+  box-shadow:0 12px 30px rgba(31,37,40,.11);
+  backdrop-filter:blur(10px);
+  color:#354246;
+  font-size:.9rem;
+}
+.global-timer strong{font-variant-numeric:tabular-nums;font-size:1rem;}
+.global-timer .timer-dot{width:9px;height:9px;border-radius:999px;background:#7c9b79;box-shadow:0 0 0 5px rgba(124,155,121,.14)}
+.step-timer,.timer-notice{display:none!important;}
+.result-question-list{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:14px;}
+.result-question-group{border:1px solid var(--line);border-radius:18px;background:#fbf8f2;padding:14px 16px;}
+.result-question{display:block;color:#7b858a;font-size:.9rem;margin-bottom:10px;line-height:1.4;}
+.result-answer-list{margin:0;padding-left:1.1rem;}
+.result-answer-list li{background:#fff;border:1px solid rgba(228,221,209,.82);border-radius:14px;padding:10px 12px;margin-top:8px;}
+@media(max-width:900px){
+  .global-timer{position:sticky;top:8px;right:auto;margin:10px auto 0;width:min(100% - 32px,1100px);justify-content:center;border-radius:22px;}
+}
+@media(max-width:560px){
+  .global-timer{font-size:.82rem;padding:9px 12px;}
+  .primary-card,.secondary-card,.info-card{min-height:155px!important;}
+  .start-card{padding:22px!important;}
+}
