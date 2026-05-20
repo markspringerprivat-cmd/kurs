@@ -684,3 +684,198 @@ li + li { margin-top: 6px; }
   .step-workspace, .conversation-grid, .statement-form { grid-template-columns: 1fr; }
   .step-navigation, .step-navigation.split { flex-direction: column; }
 }
+
+
+/* Layout-Überarbeitung: Abstände, Buttons, mobile Darstellung */
+.button.subtle {
+  background: rgba(255,255,255,0.86);
+  color: #314044;
+  border: 1px solid rgba(49,64,68,0.14);
+  box-shadow: 0 10px 24px rgba(31,37,40,0.06);
+}
+.button.subtle:hover { background: #ffffff; color: #162226; }
+.role-header.utility-topbar {
+  width: min(1280px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 0 8px;
+}
+.utility-topbar .top-actions {
+  width: 100%;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.save-button,
+.reset-button,
+.back-link,
+.button.small {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.landing-page-clean {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(18px, 4vw, 54px);
+}
+.landing-only { width: min(1080px, 100%); }
+.landing-intro {
+  text-align: center;
+  margin-bottom: clamp(18px, 4vh, 34px);
+}
+.landing-intro h1 {
+  font-size: clamp(1.75rem, 4vw, 3.2rem);
+  margin: 0;
+}
+.landing-tiles-clean {
+  align-items: center;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+}
+.landing-tiles-clean .landing-tile {
+  min-height: auto;
+  align-content: center;
+  justify-content: start;
+  gap: 14px;
+  padding: clamp(24px, 4vw, 46px);
+}
+.landing-tiles-clean .featured-tile { min-height: clamp(270px, 34vh, 360px); }
+.landing-tiles-clean .secondary-tile { min-height: clamp(220px, 28vh, 300px); }
+.landing-tiles-clean .landing-tile h2 {
+  font-size: clamp(1.8rem, 4vw, 3.25rem);
+  margin: 0 0 14px;
+}
+.landing-tiles-clean .secondary-tile h2 { font-size: clamp(1.55rem, 3.2vw, 2.7rem); }
+.landing-tiles-clean .landing-tile p:not(.eyebrow) {
+  font-size: clamp(.98rem, 1.4vw, 1.1rem);
+  line-height: 1.55;
+}
+.step-main { padding-top: clamp(10px, 2vw, 22px); }
+.step-card {
+  padding: clamp(14px, 2vw, 22px);
+}
+.step-card > .role-hero,
+.step-card > .step-title-bar {
+  margin: 0 0 clamp(18px, 2.5vw, 28px);
+  border-radius: 26px;
+}
+.step-title-bar h1,
+.role-hero h1 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1.02;
+}
+.step-title-bar p:last-child,
+.role-hero p:not(.eyebrow) {
+  margin-top: 16px;
+  line-height: 1.6;
+}
+.step-workspace,
+.conversation-grid,
+.content-grid {
+  gap: clamp(16px, 2.5vw, 24px);
+}
+.prompt-card,
+.review-card,
+.list-card,
+.input-card,
+.info-box {
+  padding: clamp(20px, 2.4vw, 28px);
+}
+.prompt-card h2,
+.review-card h2,
+.list-card h2,
+.input-card span,
+.info-box h2 {
+  margin-bottom: 14px;
+}
+.prompt-card ul,
+.info-box ul {
+  margin-top: 12px;
+}
+.prompt-card li,
+.info-box li { line-height: 1.55; }
+.support-text,
+.field-help {
+  color: #5f6d70;
+  line-height: 1.55;
+}
+.support-text { margin: 0 0 14px; }
+.field-help {
+  display: block;
+  font-size: .92rem;
+  margin: -4px 0 12px;
+}
+.input-card textarea,
+.input-card input,
+textarea,
+input {
+  border-radius: 18px;
+}
+.input-card textarea { min-height: 210px; }
+.statement-form {
+  align-items: stretch;
+}
+.statement-form .button {
+  align-self: end;
+  margin-bottom: 2px;
+}
+.sentence-chips { margin-top: 8px; }
+.sentence-chip { line-height: 1.35; }
+.saved-preview,
+.saved-list {
+  margin-top: 10px;
+}
+.step-navigation {
+  padding: clamp(18px, 2.8vw, 30px) 0 0;
+  margin-top: clamp(18px, 2.5vw, 28px);
+  border-top: 1px solid rgba(228,221,209,0.75);
+}
+.step-navigation .button {
+  min-width: 190px;
+}
+.cards-page-shell .situation-card-stacked {
+  margin-top: clamp(8px, 2vw, 20px);
+}
+.clean-role-links .tiles { gap: clamp(16px, 2.4vw, 24px); }
+.clean-role-links .tile {
+  min-height: 190px;
+  justify-content: center;
+}
+@media (max-width: 900px) {
+  .landing-tiles-clean { grid-template-columns: 1fr; }
+  .landing-tiles-clean .featured-tile,
+  .landing-tiles-clean .secondary-tile { min-height: auto; }
+  .landing-page-clean { align-items: center; }
+}
+@media (max-width: 640px) {
+  body { line-height: 1.55; }
+  .landing-page-clean { padding: 18px; align-items: center; }
+  .landing-intro { margin-bottom: 18px; }
+  .landing-tiles-clean .landing-tile {
+    border-radius: 28px;
+    padding: 24px;
+  }
+  .role-header.utility-topbar { width: min(100% - 22px, 1280px); padding-top: 12px; }
+  .utility-topbar .top-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .save-status { text-align: center; }
+  .step-card { border-radius: 26px; padding: 12px; }
+  .step-title-bar,
+  .role-hero { padding: 24px; }
+  .content-grid,
+  .step-workspace,
+  .conversation-grid { padding: 0; }
+  .prompt-card,
+  .review-card,
+  .list-card,
+  .input-card,
+  .info-box { border-radius: 22px; }
+  .step-navigation { display: grid; grid-template-columns: 1fr; }
+  .step-navigation .button { width: 100%; min-width: 0; }
+  textarea, .input-card textarea { min-height: 180px; }
+}

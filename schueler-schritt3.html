@@ -4,13 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Schüler/in · Schritt 3</title>
-  <link rel="stylesheet" href="style.css?v=9" />
-  <script src="script.js?v=9" defer></script>
+  <link rel="stylesheet" href="style.css?v=10" />
+  <script src="script.js?v=10" defer></script>
 </head>
 <body data-page="role-step" data-role="schueler" data-step="3">
   <header class="role-header topbar utility-topbar" aria-label="Seitenaktionen">
     <div class="top-actions">
-      <a class="button subtle small" href="rollenkarten.html">Zurück</a>
+      <a class="button subtle small" href="index.html">Zurück zur Hauptseite</a>
       <button class="reset-button" type="button" data-reset>Webseite zurücksetzen</button>
     </div>
   </header>
@@ -30,11 +30,13 @@
         </div>
         <div class="prompt-card full-width">
           <h2>Satzstarter</h2>
-          <div class="sentence-chips"><button type="button" class="sentence-chip" data-template="Ich bin wütend, weil …">Ich bin wütend, weil …</button><button type="button" class="sentence-chip" data-template="Ich wünsche mir, dass …">Ich wünsche mir, dass …</button><button type="button" class="sentence-chip" data-template="Ich fühle mich unfair behandelt, wenn …">Ich fühle mich unfair behandelt, wenn …</button><button type="button" class="sentence-chip" data-template="Ich brauche, dass …">Ich brauche, dass …</button></div>
+          <p class="support-text">Wähle einen Satzstarter oder formuliere eine eigene Frage. Mindestens drei Beispiele stehen schon bereit.</p>
+          <div class="sentence-chips"><button type="button" class="sentence-chip" data-template="Ich bin wütend, weil …">Ich bin wütend, weil …</button><button type="button" class="sentence-chip" data-template="Ich wünsche mir, dass …">Ich wünsche mir, dass …</button><button type="button" class="sentence-chip" data-template="Ich fühle mich unfair behandelt, wenn …">Ich fühle mich unfair behandelt, wenn …</button></div>
         </div>
         <form class="statement-form full-width" data-list-form="statements-schueler">
           <label class="input-card">
             <span>Neue Frage oder neuer Satz</span>
+            <small class="field-help">Nach dem Hinzufügen erscheint der Satz unten in deiner Liste.</small>
             <input type="text" data-list-input placeholder="z. B. Ich bin wütend, weil ..." />
           </label>
           <button class="button primary" type="submit">Aussage hinzufügen</button>

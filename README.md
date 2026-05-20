@@ -1,5 +1,5 @@
 # Rollenspiel-Webseite
 
-Statische GitHub-Pages-Webseite mit Rollenverteilung, Rollenkarten, mehrstufiger Vorbereitung, Gesprächsnotizen, Reflexionsbogen und Exportfunktion.
+Statische GitHub-Pages-Webseite mit Rollenverteilung, Rollenkarten, mehrstufiger Vorbereitung, Reflexionsbogen und Export.
 
-Alle Dateien liegen bewusst auf einer Ebene. Lade den entpackten Inhalt direkt in das Repository hoch.
+Alle Dateien liegen absichtlich direkt auf oberster Ebene. Für GitHub Pages den entpackten Inhalt dieses Ordners in das Repository hochladen.
