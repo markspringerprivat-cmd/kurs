@@ -306,13 +306,7 @@ function getSaved(key, fallback = '') {
 
 function getExportData() {
   return {
-    names: loadJson('names', []),
     assignments: loadJson('assignments', []),
-    notes: {
-      'Schüler/in': getSaved('notes-schueler'),
-      'Lehrkraft': getSaved('notes-lehrkraft'),
-      'Beobachter/in': getSaved('notes-beobachter')
-    },
     reflection: {
       'Was ist im Gespräch passiert?': getSaved('reflexion-verlauf'),
       'Welche Aussagen oder Verhaltensweisen haben die Beziehung gefördert?': getSaved('reflexion-foerdernd'),
@@ -327,27 +321,31 @@ function textOrDash(value) {
   return value && value.trim() ? value.trim() : '—';
 }
 
+function roleClass(role) {
+  if (role.includes('Lehrkraft')) return 'teacher';
+  if (role.includes('Schüler')) return 'student';
+  return 'observer';
+}
+
 function buildExportHtml() {
   const data = getExportData();
+  const date = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const assignmentRows = data.assignments.length
-    ? data.assignments.map(item => `<tr><td>${escapeHtml(item.role)}</td><td>${escapeHtml(item.name)}</td></tr>`).join('')
-    : '<tr><td colspan="2">Noch keine Rollenverteilung gespeichert.</td></tr>';
+    ? data.assignments.map(item => `
+      <tr>
+        <td><span class="role-pill ${roleClass(item.role)}">${escapeHtml(item.role)}</span></td>
+        <td>${escapeHtml(item.name)}</td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="2" class="empty">Noch keine Rollenverteilung gespeichert.</td></tr>';
 
-  const nameList = data.names.length
-    ? data.names.map(name => `<li>${escapeHtml(name)}</li>`).join('')
-    : '<li>Keine Namen gespeichert.</li>';
-
-  const notes = Object.entries(data.notes).map(([title, value]) => `
-    <section>
-      <h3>${escapeHtml(title)}</h3>
-      <p>${escapeHtml(textOrDash(value)).replace(/\n/g, '<br>')}</p>
-    </section>
-  `).join('');
-
-  const reflection = Object.entries(data.reflection).map(([title, value]) => `
-    <section>
-      <h3>${escapeHtml(title)}</h3>
-      <p>${escapeHtml(textOrDash(value)).replace(/\n/g, '<br>')}</p>
+  const reflection = Object.entries(data.reflection).map(([title, value], index) => `
+    <section class="answer-card">
+      <div class="answer-number">${index + 1}</div>
+      <div>
+        <h3>${escapeHtml(title)}</h3>
+        <p>${escapeHtml(textOrDash(value)).replace(/\n/g, '<br>')}</p>
+      </div>
     </section>
   `).join('');
 
@@ -355,28 +353,143 @@ function buildExportHtml() {
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Export Rollenverteilung</title>
+<title>Reflexionsbogen Rollenspiel</title>
 <style>
-  body { font-family: Arial, sans-serif; color: #1f2528; line-height: 1.45; margin: 36px; }
-  h1 { font-size: 28px; margin: 0 0 18px; }
-  h2 { font-size: 21px; margin: 28px 0 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-  h3 { font-size: 16px; margin: 16px 0 5px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-  th, td { border: 1px solid #bbb; text-align: left; padding: 8px; vertical-align: top; }
-  p { white-space: normal; margin: 0; }
-  section { break-inside: avoid; }
+  @page { size: A4; margin: 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #172126;
+    line-height: 1.5;
+    margin: 0;
+    background: #f6f8f7;
+  }
+  .page {
+    max-width: 840px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #d9e2dd;
+    border-radius: 22px;
+    overflow: hidden;
+  }
+  header {
+    padding: 28px 34px;
+    background: linear-gradient(135deg, #eef7f1 0%, #edf3fb 100%);
+    border-bottom: 1px solid #d9e2dd;
+  }
+  .eyebrow {
+    margin: 0 0 6px;
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #5c6d73;
+    font-weight: 700;
+  }
+  h1 {
+    margin: 0;
+    font-size: 30px;
+    letter-spacing: -0.03em;
+  }
+  .date {
+    margin: 8px 0 0;
+    color: #5d6a70;
+    font-size: 13px;
+  }
+  main { padding: 26px 34px 34px; }
+  h2 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+  }
+  .section { margin-top: 24px; }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid #dce5df;
+    border-radius: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5ece8;
+    vertical-align: top;
+  }
+  th {
+    background: #f4f7f6;
+    color: #506168;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  tr:last-child td { border-bottom: 0; }
+  .role-pill {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .student { background: #e8f5ec; color: #1f6b3a; }
+  .teacher { background: #fdeaea; color: #9d2c2c; }
+  .observer { background: #eaf1fb; color: #285a92; }
+  .answer-card {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 12px;
+    padding: 15px 16px;
+    border: 1px solid #dce5df;
+    border-radius: 16px;
+    margin: 12px 0;
+    break-inside: avoid;
+    background: #ffffff;
+  }
+  .answer-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    background: #eaf1fb;
+    color: #285a92;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+  }
+  h3 {
+    margin: 0 0 6px;
+    font-size: 14px;
+  }
+  p { margin: 0; white-space: normal; }
+  .empty { color: #728086; }
+  @media print {
+    body { background: #ffffff; }
+    .page { border: 0; border-radius: 0; }
+  }
 </style>
 </head>
 <body>
-  <h1>Rollenverteilung für das Rollenspiel</h1>
-  <h2>Eingetragene Namen</h2>
-  <ul>${nameList}</ul>
-  <h2>Rollenverteilung</h2>
-  <table><thead><tr><th>Rolle</th><th>Name</th></tr></thead><tbody>${assignmentRows}</tbody></table>
-  <h2>Notizen</h2>
-  ${notes}
-  <h2>Reflexionsbogen</h2>
-  ${reflection}
+  <div class="page">
+    <header>
+      <p class="eyebrow">Rollenspiel</p>
+      <h1>Reflexionsbogen</h1>
+      <p class="date">Exportiert am ${date}</p>
+    </header>
+    <main>
+      <section class="section">
+        <h2>Rollenverteilung</h2>
+        <table>
+          <thead><tr><th>Rolle</th><th>Name</th></tr></thead>
+          <tbody>${assignmentRows}</tbody>
+        </table>
+      </section>
+      <section class="section">
+        <h2>Reflexion</h2>
+        ${reflection}
+      </section>
+    </main>
+  </div>
 </body>
 </html>`;
 }
@@ -392,17 +505,17 @@ function exportPdf() {
   popup.document.write(buildExportHtml());
   popup.document.close();
   popup.focus();
-  setTimeout(() => popup.print(), 300);
+  setTimeout(() => popup.print(), 350);
 }
 
-function crc32(str) {
-  const table = crc32.table || (crc32.table = Array.from({ length: 256 }, (_, n) => {
+function crc32Bytes(bytes) {
+  const table = crc32Bytes.table || (crc32Bytes.table = Array.from({ length: 256 }, (_, n) => {
     let c = n;
     for (let k = 0; k < 8; k++) c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
     return c >>> 0;
   }));
   let crc = 0 ^ -1;
-  for (let i = 0; i < str.length; i++) crc = (crc >>> 8) ^ table[(crc ^ str.charCodeAt(i)) & 0xFF];
+  for (let i = 0; i < bytes.length; i++) crc = (crc >>> 8) ^ table[(crc ^ bytes[i]) & 0xFF];
   return (crc ^ -1) >>> 0;
 }
 
@@ -420,7 +533,7 @@ function zipStored(files) {
   files.forEach(file => {
     const nameBytes = toBytes(file.name);
     const data = toBytes(file.content);
-    const crc = crc32(String.fromCharCode(...data));
+    const crc = crc32Bytes(data);
     const local = new Uint8Array([
       ...u32(0x04034b50), ...u16(20), ...u16(0), ...u16(0), ...u16(0), ...u16(0),
       ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(nameBytes.length), ...u16(0)
@@ -448,38 +561,78 @@ function zipStored(files) {
   return new Blob(chunks, { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
 }
 
-function wordXml() {
-  const html = buildExportHtml()
-    .replace(/<br>/g, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>');
-  const lines = html.split(/\n+/).map(line => line.trim()).filter(Boolean);
-  const paragraphs = lines.map(line => `<w:p><w:r><w:t xml:space="preserve">${escapeXml(line)}</w:t></w:r></w:p>`).join('');
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${paragraphs}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr></w:body></w:document>`;
-}
-
 function escapeXml(value) {
   return String(value).replace(/[<>&"']/g, char => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[char]));
+}
+
+function xmlText(value) {
+  return escapeXml(textOrDash(value));
+}
+
+function wParagraph(text, style = 'Normal') {
+  const lines = String(textOrDash(text)).split(/\n/);
+  const runs = lines.map((line, index) => `${index ? '<w:br/>' : ''}<w:t xml:space="preserve">${escapeXml(line)}</w:t>`).join('');
+  return `<w:p><w:pPr><w:pStyle w:val="${style}"/></w:pPr><w:r>${runs}</w:r></w:p>`;
+}
+
+function wTable(rows) {
+  const tableRows = rows.map(row => `<w:tr>${row.map(cell => `<w:tc><w:tcPr><w:tcW w:w="4500" w:type="dxa"/></w:tcPr>${wParagraph(cell)}</w:tc>`).join('')}</w:tr>`).join('');
+  return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="0" w:type="auto"/><w:tblBorders><w:top w:val="single" w:sz="6" w:space="0" w:color="D7E1DC"/><w:left w:val="single" w:sz="6" w:space="0" w:color="D7E1DC"/><w:bottom w:val="single" w:sz="6" w:space="0" w:color="D7E1DC"/><w:right w:val="single" w:sz="6" w:space="0" w:color="D7E1DC"/><w:insideH w:val="single" w:sz="6" w:space="0" w:color="D7E1DC"/><w:insideV w:val="single" w:sz="6" w:space="0" w:color="D7E1DC"/></w:tblBorders></w:tblPr>${tableRows}</w:tbl>`;
+}
+
+function wordXml() {
+  const data = getExportData();
+  const date = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const assignmentRows = data.assignments.length
+    ? [['Rolle', 'Name'], ...data.assignments.map(item => [item.role, item.name])]
+    : [['Rolle', 'Name'], ['—', 'Noch keine Rollenverteilung gespeichert.']];
+
+  const reflectionBlocks = Object.entries(data.reflection).map(([title, value], index) =>
+    `${wParagraph(`${index + 1}. ${title}`, 'Heading2')}${wParagraph(value || '—')}`
+  ).join('');
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    ${wParagraph('Reflexionsbogen', 'Title')}
+    ${wParagraph(`Rollenspiel · Exportiert am ${date}`, 'Subtitle')}
+    ${wParagraph('Rollenverteilung', 'Heading1')}
+    ${wTable(assignmentRows)}
+    ${wParagraph('Reflexion', 'Heading1')}
+    ${reflectionBlocks}
+    <w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1200" w:right="1200" w:bottom="1200" w:left="1200"/></w:sectPr>
+  </w:body>
+</w:document>`;
+}
+
+function stylesXml() {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:rPr><w:rFonts w:ascii="Aptos" w:hAnsi="Aptos"/><w:sz w:val="22"/></w:rPr><w:pPr><w:spacing w:after="160" w:line="276" w:lineRule="auto"/></w:pPr></w:style>
+  <w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:rPr><w:b/><w:sz w:val="44"/><w:color w:val="172126"/></w:rPr><w:pPr><w:spacing w:after="100"/></w:pPr></w:style>
+  <w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:rPr><w:sz w:val="20"/><w:color w:val="617079"/></w:rPr><w:pPr><w:spacing w:after="360"/></w:pPr></w:style>
+  <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:rPr><w:b/><w:sz w:val="30"/><w:color w:val="172126"/></w:rPr><w:pPr><w:spacing w:before="260" w:after="120"/></w:pPr></w:style>
+  <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="285A92"/></w:rPr><w:pPr><w:spacing w:before="220" w:after="80"/></w:pPr></w:style>
+</w:styles>`;
 }
 
 function exportDocx() {
   saveAllVisibleInputs();
   const blob = zipStored([
-    { name: '[Content_Types].xml', content: '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>' },
+    { name: '[Content_Types].xml', content: '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>' },
     { name: '_rels/.rels', content: '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>' },
-    { name: 'word/document.xml', content: wordXml() }
+    { name: 'word/_rels/document.xml.rels', content: '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' },
+    { name: 'word/document.xml', content: wordXml() },
+    { name: 'word/styles.xml', content: stylesXml() }
   ]);
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = 'rollenspiel-reflexion.docx';
+  link.download = 'rollenspiel-reflexionsbogen.docx';
   document.body.appendChild(link);
   link.click();
+  const href = link.href;
   link.remove();
-  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  setTimeout(() => URL.revokeObjectURL(href), 1000);
 }
 
 function setupExports() {
