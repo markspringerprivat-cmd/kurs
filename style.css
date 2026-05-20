@@ -464,3 +464,76 @@ li + li { margin-top: 6px; }
   .landing-tile { min-height: 220px; }
   .topbar { align-items: flex-start; }
 }
+
+
+/* Clean navigation and landing/card-page adjustments */
+.utility-topbar {
+  justify-content: flex-end;
+  min-height: 48px;
+}
+.utility-topbar .top-actions {
+  margin-left: auto;
+}
+.landing-page-clean {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 4vw, 54px);
+}
+.landing-only {
+  width: min(1040px, 100%);
+}
+.landing-tiles-clean {
+  width: 100%;
+}
+.landing-tiles-clean .landing-tile {
+  min-height: clamp(260px, 36vw, 380px);
+  align-content: end;
+  padding: clamp(30px, 5vw, 56px);
+  border-radius: clamp(28px, 4vw, 46px);
+}
+.landing-tiles-clean .landing-tile h2 {
+  font-size: clamp(2rem, 4.2vw, 4.4rem);
+  margin-bottom: 16px;
+}
+.landing-tiles-clean .landing-tile p:not(.eyebrow) {
+  font-size: clamp(1rem, 1.5vw, 1.18rem);
+}
+.landing-tiles-clean .tile-icon { display: none; }
+.landing-tiles-clean .distribution-tile {
+  background:
+    radial-gradient(circle at 15% 15%, rgba(255,255,255,0.72), transparent 18rem),
+    linear-gradient(145deg, rgba(220,239,212,0.96), rgba(183,218,174,0.58));
+}
+.landing-tiles-clean .cards-tile {
+  background:
+    radial-gradient(circle at 15% 15%, rgba(255,255,255,0.72), transparent 18rem),
+    linear-gradient(145deg, rgba(220,230,247,0.96), rgba(170,192,232,0.56));
+}
+.cards-page-shell {
+  margin-top: 14px;
+}
+.situation-card-stacked {
+  display: block;
+  max-width: 1100px;
+  margin-inline: auto;
+}
+.situation-card-stacked h1 {
+  margin: 0 0 18px;
+  font-size: clamp(1.9rem, 4vw, 3.35rem);
+  white-space: nowrap;
+}
+.situation-card-stacked p {
+  font-size: clamp(1.02rem, 1.4vw, 1.15rem);
+}
+.clean-role-links {
+  margin-top: 24px;
+}
+.clean-role-links .tile h2 {
+  font-size: clamp(1.65rem, 2.6vw, 2.35rem);
+}
+
+@media (max-width: 780px) {
+  .landing-page-clean { align-items: start; }
+  .situation-card-stacked h1 { white-space: normal; }
+}
