@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Schüler/in · Schritt 3</title>
+  <link rel="stylesheet" href="style.css?v=9" />
+  <script src="script.js?v=9" defer></script>
+</head>
+<body data-page="role-step" data-role="schueler" data-step="3">
+  <header class="role-header topbar utility-topbar" aria-label="Seitenaktionen">
+    <div class="top-actions">
+      <a class="button subtle small" href="rollenkarten.html">Zurück</a>
+      <button class="reset-button" type="button" data-reset>Webseite zurücksetzen</button>
+    </div>
+  </header>
+
+  <main class="role-main step-main">
+    <article class="role-page-card step-card">
+      <section class="step-title-bar student">
+        <p class="eyebrow">Schritt 3</p>
+        <h1>Fragen und Sätze für das Gespräch entwerfen</h1>
+        <p>Nutze deine Gedanken aus Schritt 2 und formuliere daraus konkrete Gesprächsimpulse.</p>
+      </section>
+      <section class="step-workspace">
+        <div class="review-card full-width">
+          <p class="eyebrow">Aus Schritt 2</p>
+          <h2>Meine bisherigen Gedanken</h2>
+          <div class="saved-preview" data-display-from="prep-schueler">Noch keine Gedanken gespeichert.</div>
+        </div>
+        <div class="prompt-card full-width">
+          <h2>Satzstarter</h2>
+          <div class="sentence-chips"><button type="button" class="sentence-chip" data-template="Ich bin wütend, weil …">Ich bin wütend, weil …</button><button type="button" class="sentence-chip" data-template="Ich wünsche mir, dass …">Ich wünsche mir, dass …</button><button type="button" class="sentence-chip" data-template="Ich fühle mich unfair behandelt, wenn …">Ich fühle mich unfair behandelt, wenn …</button><button type="button" class="sentence-chip" data-template="Ich brauche, dass …">Ich brauche, dass …</button></div>
+        </div>
+        <form class="statement-form full-width" data-list-form="statements-schueler">
+          <label class="input-card">
+            <span>Neue Frage oder neuer Satz</span>
+            <input type="text" data-list-input placeholder="z. B. Ich bin wütend, weil ..." />
+          </label>
+          <button class="button primary" type="submit">Aussage hinzufügen</button>
+        </form>
+        <div class="list-card full-width">
+          <h2>Meine Gesprächsimpulse</h2>
+          <div class="saved-list" data-list-display="statements-schueler"></div>
+        </div>
+      </section>
+      <div class="step-navigation split"><a class="button subtle" href="schueler-schritt2.html">Zurück zu Schritt 2</a><a class="button primary" href="schueler-schritt4.html">Weiter zu Schritt 4</a></div>
+    </article>
+  </main>
+</body>
+</html>

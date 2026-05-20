@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lehrkraft · Schritt 3</title>
+  <link rel="stylesheet" href="style.css?v=9" />
+  <script src="script.js?v=9" defer></script>
+</head>
+<body data-page="role-step" data-role="lehrkraft" data-step="3">
+  <header class="role-header topbar utility-topbar" aria-label="Seitenaktionen">
+    <div class="top-actions">
+      <a class="button subtle small" href="rollenkarten.html">Zurück</a>
+      <button class="reset-button" type="button" data-reset>Webseite zurücksetzen</button>
+    </div>
+  </header>
+
+  <main class="role-main step-main">
+    <article class="role-page-card step-card">
+      <section class="step-title-bar teacher">
+        <p class="eyebrow">Schritt 3</p>
+        <h1>Fragen und Sätze für das Gespräch entwerfen</h1>
+        <p>Nutze deine Gedanken aus Schritt 2 und formuliere daraus konkrete Gesprächsimpulse.</p>
+      </section>
+      <section class="step-workspace">
+        <div class="review-card full-width">
+          <p class="eyebrow">Aus Schritt 2</p>
+          <h2>Meine bisherigen Gedanken</h2>
+          <div class="saved-preview" data-display-from="prep-lehrkraft">Noch keine Gedanken gespeichert.</div>
+        </div>
+        <div class="prompt-card full-width">
+          <h2>Satzstarter</h2>
+          <div class="sentence-chips"><button type="button" class="sentence-chip" data-template="Ich möchte verstehen, warum …">Ich möchte verstehen, warum …</button><button type="button" class="sentence-chip" data-template="Mir ist wichtig, dass …">Mir ist wichtig, dass …</button><button type="button" class="sentence-chip" data-template="Ich nehme wahr, dass …">Ich nehme wahr, dass …</button><button type="button" class="sentence-chip" data-template="Ich wünsche mir, dass wir …">Ich wünsche mir, dass wir …</button></div>
+        </div>
+        <form class="statement-form full-width" data-list-form="statements-lehrkraft">
+          <label class="input-card">
+            <span>Neue Frage oder neuer Satz</span>
+            <input type="text" data-list-input placeholder="z. B. Ich möchte verstehen, warum ..." />
+          </label>
+          <button class="button primary" type="submit">Aussage hinzufügen</button>
+        </form>
+        <div class="list-card full-width">
+          <h2>Meine Gesprächsimpulse</h2>
+          <div class="saved-list" data-list-display="statements-lehrkraft"></div>
+        </div>
+      </section>
+      <div class="step-navigation split"><a class="button subtle" href="lehrkraft-schritt2.html">Zurück zu Schritt 2</a><a class="button primary" href="lehrkraft-schritt4.html">Weiter zu Schritt 4</a></div>
+    </article>
+  </main>
+</body>
+</html>
