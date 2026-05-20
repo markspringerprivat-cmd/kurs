@@ -1,12 +1,5 @@
-const STORAGE_PREFIX = 'rollenkarten-v2-';
-const COOKIE_DAYS = 30;
-
-const input = document.querySelector('#nameInput');
-const form = document.querySelector('#nameForm');
-const nameList = document.querySelector('#nameList');
-const results = document.querySelector('#results');
-const assignButton = document.querySelector('#assignButton');
-const clearButton = document.querySelector('#clearButton');
+const STORAGE_PREFIX = 'rollenkarten-v3-';
+const COOKIE_DAYS = 60;
 
 let names = [];
 let assignments = [];
@@ -19,34 +12,48 @@ function setCookie(key, value) {
   try {
     const expires = new Date(Date.now() + COOKIE_DAYS * 24 * 60 * 60 * 1000).toUTCString();
     document.cookie = `${storageKey(key)}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
-  } catch {}
+  } catch (error) {
+    console.warn('Cookie konnte nicht gesetzt werden:', error);
+  }
 }
 
 function getCookie(key) {
-  const name = `${storageKey(key)}=`;
-  return document.cookie
-    .split(';')
-    .map(part => part.trim())
-    .find(part => part.startsWith(name))
-    ?.slice(name.length);
+  try {
+    const name = `${storageKey(key)}=`;
+    const entry = document.cookie
+      .split(';')
+      .map(part => part.trim())
+      .find(part => part.startsWith(name));
+    return entry ? decodeURIComponent(entry.slice(name.length)) : null;
+  } catch {
+    return null;
+  }
 }
 
 function saveValue(key, value) {
   const text = typeof value === 'string' ? value : JSON.stringify(value);
-  localStorage.setItem(storageKey(key), text);
+  try {
+    localStorage.setItem(storageKey(key), text);
+  } catch (error) {
+    console.warn('localStorage konnte nicht beschrieben werden:', error);
+  }
   if (text.length < 3500) setCookie(key, text);
+  showSaveStatus('Gespeichert');
 }
 
 function loadValue(key, fallback = '') {
-  const local = localStorage.getItem(storageKey(key));
-  if (local !== null) return local;
+  try {
+    const local = localStorage.getItem(storageKey(key));
+    if (local !== null) return local;
+  } catch {}
   const cookie = getCookie(key);
-  return cookie ? decodeURIComponent(cookie) : fallback;
+  return cookie !== null ? cookie : fallback;
 }
 
 function loadJson(key, fallback) {
   try {
-    return JSON.parse(loadValue(key, JSON.stringify(fallback))) || fallback;
+    const raw = loadValue(key, JSON.stringify(fallback));
+    return JSON.parse(raw) || fallback;
   } catch {
     return fallback;
   }
@@ -71,6 +78,15 @@ function shuffle(array) {
   return copy;
 }
 
+function showSaveStatus(text) {
+  const status = document.querySelector('[data-save-status]');
+  if (!status) return;
+  status.textContent = text;
+  status.classList.add('visible');
+  window.clearTimeout(showSaveStatus.timer);
+  showSaveStatus.timer = window.setTimeout(() => status.classList.remove('visible'), 1800);
+}
+
 function saveNames() {
   saveValue('names', names);
 }
@@ -85,6 +101,7 @@ function loadHomeState() {
 }
 
 function renderNames() {
+  const nameList = document.querySelector('#nameList');
   if (!nameList) return;
   nameList.innerHTML = '';
 
@@ -112,6 +129,7 @@ function renderNames() {
 }
 
 function renderAssignments() {
+  const results = document.querySelector('#results');
   if (!results) return;
 
   if (!assignments.length) {
@@ -128,8 +146,9 @@ function renderAssignments() {
 }
 
 function assignRoles() {
+  const results = document.querySelector('#results');
   if (names.length < 2) {
-    results.innerHTML = '<p class="empty-state warning">Bitte mindestens zwei Namen eintragen.</p>';
+    if (results) results.innerHTML = '<p class="empty-state warning">Bitte mindestens zwei Namen eintragen.</p>';
     return;
   }
 
@@ -145,6 +164,11 @@ function assignRoles() {
 }
 
 function setupHome() {
+  const form = document.querySelector('#nameForm');
+  const input = document.querySelector('#nameInput');
+  const assignButton = document.querySelector('#assignButton');
+  const clearButton = document.querySelector('#clearButton');
+
   if (!form) return;
   loadHomeState();
   renderNames();
@@ -185,25 +209,68 @@ function setupAutosaveFields() {
     const key = field.dataset.saveKey;
     field.value = loadValue(key, '');
     field.addEventListener('input', () => saveValue(key, field.value));
+    field.addEventListener('change', () => saveValue(key, field.value));
   });
+}
+
+function saveAllVisibleInputs() {
+  document.querySelectorAll('[data-save-key]').forEach(field => {
+    saveValue(field.dataset.saveKey, field.value || '');
+  });
+  saveNames();
+  saveAssignments();
+  showSaveStatus('Alles gespeichert');
 }
 
 function clearCookies() {
-  document.cookie.split(';').forEach(cookie => {
-    const eqPos = cookie.indexOf('=');
-    const name = eqPos > -1 ? cookie.slice(0, eqPos).trim() : cookie.trim();
-    if (name.startsWith(STORAGE_PREFIX)) {
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
-    }
-  });
+  try {
+    document.cookie.split(';').forEach(cookie => {
+      const eqPos = cookie.indexOf('=');
+      const name = eqPos > -1 ? cookie.slice(0, eqPos).trim() : cookie.trim();
+      if (name.startsWith(STORAGE_PREFIX)) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+      }
+    });
+  } catch {}
 }
 
 function resetWebsite() {
-  Object.keys(localStorage)
-    .filter(key => key.startsWith(STORAGE_PREFIX))
-    .forEach(key => localStorage.removeItem(key));
+  try {
+    Object.keys(localStorage)
+      .filter(key => key.startsWith(STORAGE_PREFIX))
+      .forEach(key => localStorage.removeItem(key));
+  } catch {}
   clearCookies();
   window.location.href = 'index.html';
+}
+
+function setupTopbarStorageControls() {
+  const topbar = document.querySelector('.topbar');
+  if (!topbar) return;
+
+  let actions = topbar.querySelector('.top-actions');
+  if (!actions) {
+    actions = document.createElement('div');
+    actions.className = 'top-actions';
+    topbar.appendChild(actions);
+  }
+
+  if (!actions.querySelector('[data-save-now]')) {
+    const saveButton = document.createElement('button');
+    saveButton.className = 'save-button';
+    saveButton.type = 'button';
+    saveButton.dataset.saveNow = 'true';
+    saveButton.textContent = 'Eingaben speichern';
+    saveButton.addEventListener('click', saveAllVisibleInputs);
+    actions.insertBefore(saveButton, actions.firstChild);
+  }
+
+  if (!actions.querySelector('[data-save-status]')) {
+    const status = document.createElement('span');
+    status.className = 'save-status';
+    status.dataset.saveStatus = 'true';
+    actions.insertBefore(status, actions.firstChild);
+  }
 }
 
 function setupReset() {
@@ -215,6 +282,11 @@ function setupReset() {
   });
 }
 
-setupHome();
-setupAutosaveFields();
-setupReset();
+window.addEventListener('beforeunload', saveAllVisibleInputs);
+
+document.addEventListener('DOMContentLoaded', () => {
+  setupTopbarStorageControls();
+  setupHome();
+  setupAutosaveFields();
+  setupReset();
+});

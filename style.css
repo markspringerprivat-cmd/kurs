@@ -347,3 +347,32 @@ li + li { margin-top: 6px; }
   .role-main, .page-shell { width: min(100% - 22px, 1160px); }
   .role-header { padding-inline: 12px; }
 }
+
+
+.save-button {
+  border: 1px solid rgba(47, 64, 85, 0.18);
+  background: rgba(255, 255, 255, 0.78);
+  color: #253247;
+  border-radius: 999px;
+  padding: 0.72rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(39, 54, 72, 0.08);
+}
+
+.save-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(39, 54, 72, 0.12);
+}
+
+.save-status {
+  min-width: 0;
+  color: #526173;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.save-status.visible {
+  opacity: 1;
+}
